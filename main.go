@@ -79,7 +79,87 @@ func recordCallback(in []float32) {
     }
 }
 
+// writeWavHeader writes the WAV file header
+func writeWavHeader(file *os.File) error {
+    // WAV header constants
+    const (
+        riffHeader      = "RIFF"
+        waveHeader      = "WAVE"
+        fmtHeader       = "fmt "
+        dataHeader      = "data"
+        pcmFormat       = 1
+        bitsPerSample   = 16
+        byteRate        = 44100 * 1 * bitsPerSample / 8
+        blockAlign      = 1 * bitsPerSample / 8
+    )
 
+    // Write RIFF header
+    _, err := file.WriteString(riffHeader)
+    if err != nil {
+        return err
+    }
+    // Write file size (placeholder)
+    err = binary.Write(file, binary.LittleEndian, uint32(0))
+    if err != nil {
+        return err
+    }
+    // Write WAVE header
+    _, err = file.WriteString(waveHeader)
+    if err != nil {
+        return err
+    }
+    // Write fmt header
+    _, err = file.WriteString(fmtHeader)
+    if err != nil {
+        return err
+    }
+    // Write fmt chunk size
+    err = binary.Write(file, binary.LittleEndian, uint32(16))
+    if err != nil {
+        return err
+    }
+    // Write audio format (PCM)
+    err = binary.Write(file, binary.LittleEndian, uint16(pcmFormat))
+    if err != nil {
+        return err
+    }
+    // Write number of channels
+    err = binary.Write(file, binary.LittleEndian, uint16(1))
+    if err != nil {
+        return err
+    }
+    // Write sample rate
+    err = binary.Write(file, binary.LittleEndian, uint32(44100))
+    if err != nil {
+        return err
+    }
+    // Write byte rate
+    err = binary.Write(file, binary.LittleEndian, uint32(byteRate))
+    if err != nil {
+        return err
+    }
+    // Write block align
+    err = binary.Write(file, binary.LittleEndian, uint16(blockAlign))
+    if err != nil {
+        return err
+    }
+    // Write bits per sample
+    err = binary.Write(file, binary.LittleEndian, uint16(bitsPerSample))
+    if err != nil {
+        return err
+    }
+    // Write data header
+    _, err = file.WriteString(dataHeader)
+    if err != nil {
+        return err
+    }
+    // Write data size (placeholder)
+    err = binary.Write(file, binary.LittleEndian, uint32(0))
+    if err != nil {
+        return err
+    }
+    return nil
+}
 
 // writeFloat32SamplesToFile writes float32 audio samples to a file
 func writeFloat32SamplesToFile(filename string, data []float32) error {
